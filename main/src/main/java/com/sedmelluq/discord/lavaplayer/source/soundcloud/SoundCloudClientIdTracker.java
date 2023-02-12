@@ -19,11 +19,9 @@ public class SoundCloudClientIdTracker {
 
   private static final String ID_FETCH_CONTEXT_ATTRIBUTE = "sc-raw";
   private static final long CLIENT_ID_REFRESH_INTERVAL = TimeUnit.HOURS.toMillis(1);
-  private static final String PAGE_APP_SCRIPT_REGEX = "https://[A-Za-z0-9-.]+/assets/[a-f0-9-]+\\.js";
-  private static final String APP_SCRIPT_CLIENT_ID_REGEX = "[^_]client_id:\"([a-zA-Z0-9-_]+)\"";
+  private static final String PAGE_APP_CLIENT_ID_REGEX = "[^_]clientId\":\"([a-zA-Z0-9-_]+)\"";
 
-  private static final Pattern pageAppScriptPattern = Pattern.compile(PAGE_APP_SCRIPT_REGEX);
-  private static final Pattern appScriptClientIdPattern = Pattern.compile(APP_SCRIPT_CLIENT_ID_REGEX);
+  private static final Pattern pageAppClientIdPattern = Pattern.compile(PAGE_APP_CLIENT_ID_REGEX);
 
   private final Object clientIdLock = new Object();
   private final HttpInterfaceManager httpInterfaceManager;
@@ -75,51 +73,24 @@ public class SoundCloudClientIdTracker {
     try (HttpInterface httpInterface = httpInterfaceManager.getInterface()) {
       httpInterface.getContext().setAttribute(ID_FETCH_CONTEXT_ATTRIBUTE, true);
 
-      String scriptUrl = findApplicationScriptUrl(httpInterface);
-      return findClientIdFromApplicationScript(httpInterface, scriptUrl);
+      return findApplicationId(httpInterface);
     }
   }
 
-  private String findApplicationScriptUrl(HttpInterface httpInterface) throws IOException {
-    try (CloseableHttpResponse response = httpInterface.execute(new HttpGet("https://soundcloud.com"))) {
+  private String findApplicationId(HttpInterface httpInterface) throws IOException {
+    try (CloseableHttpResponse response = httpInterface.execute(new HttpGet("https://m.soundcloud.com"))) {
       int statusCode = response.getStatusLine().getStatusCode();
       if (!HttpClientTools.isSuccessWithContent(statusCode)) {
         throw new IOException("Invalid status code for main page response: " + statusCode);
       }
 
       String page = EntityUtils.toString(response.getEntity());
-      Matcher scriptMatcher = pageAppScriptPattern.matcher(page);
-      String result = getLastMatchWithinLimit(scriptMatcher, 9);
+      Matcher applicationIdMatcher = pageAppClientIdPattern.matcher(page);
 
-      if (result != null) {
-        return result;
+      if (applicationIdMatcher.find()) {
+        return applicationIdMatcher.group(1);
       } else {
-        throw new IllegalStateException("Could not find application script from main page.");
-      }
-    }
-  }
-
-  private String getLastMatchWithinLimit(Matcher m, int limit) {
-    String lastMatch = null;
-    for(int i = 0; m.find() && i < limit; ++i)
-      lastMatch = m.group();
-    return lastMatch;
-  }
-
-  private String findClientIdFromApplicationScript(HttpInterface httpInterface, String scriptUrl) throws IOException {
-    try (CloseableHttpResponse response = httpInterface.execute(new HttpGet(scriptUrl))) {
-      int statusCode = response.getStatusLine().getStatusCode();
-      if (!HttpClientTools.isSuccessWithContent(statusCode)) {
-        throw new IOException("Invalid status code for application script response: " + statusCode);
-      }
-
-      String page = EntityUtils.toString(response.getEntity());
-      Matcher clientIdMatcher = appScriptClientIdPattern.matcher(page);
-
-      if (clientIdMatcher.find()) {
-        return clientIdMatcher.group(1);
-      } else {
-        throw new IllegalStateException("Could not find client ID from application script.");
+        throw new IllegalStateException("Could not find client ID string from main page.");
       }
     }
   }
