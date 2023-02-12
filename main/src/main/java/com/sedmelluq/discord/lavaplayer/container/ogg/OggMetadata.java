@@ -58,4 +58,7 @@ public class OggMetadata implements AudioTrackInfoProvider {
   public String getISRC() {
     return null;
   }
+
+  @Override
+  public Boolean getIsTrackUnavailable() { return false; }
 }

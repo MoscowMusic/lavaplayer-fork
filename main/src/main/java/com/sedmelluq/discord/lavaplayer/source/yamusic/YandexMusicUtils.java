@@ -52,7 +52,8 @@ public class YandexMusicUtils {
         false,
         String.format(TRACK_URL_FORMAT, albumId, trackId),
         artworkUrl,
-        null
+        null,
+        false
     ));
   }
 }

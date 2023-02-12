@@ -259,6 +259,7 @@ public class DefaultAudioPlayerManager implements AudioPlayerManager {
     DataFormatTools.writeNullableText(output, trackInfo.uri);
     DataFormatTools.writeNullableText(output, trackInfo.artworkUrl);
     DataFormatTools.writeNullableText(output, trackInfo.isrc);
+    output.writeBoolean(trackInfo.isTrackUnavailable);
 
     encodeTrackDetails(track, output);
     output.writeLong(track.getPosition());
@@ -283,7 +284,8 @@ public class DefaultAudioPlayerManager implements AudioPlayerManager {
         input.readBoolean(),
         version >= 2 ? DataFormatTools.readNullableText(input) : null,
         version >= 3 ? DataFormatTools.readNullableText(input) : null,
-        version >= 3 ? DataFormatTools.readNullableText(input) : null
+        version >= 3 ? DataFormatTools.readNullableText(input) : null,
+        input.readBoolean()
     );
     AudioTrack track = decodeTrackDetails(trackInfo, input);
     long position = input.readLong();

@@ -50,7 +50,8 @@ public class XmContainerProbe implements MediaContainerProbe {
         true,
         reference.identifier,
         null,
-        null
+        null,
+        false
     ));
   }
 

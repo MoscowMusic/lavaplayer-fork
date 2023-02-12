@@ -118,7 +118,8 @@ public class BandcampAudioSourceManager implements AudioSourceManager, HttpConfi
         false,
         trackPageUrl,
         artworkUrl,
-        null
+        null,
+        false
     ), this);
   }
 

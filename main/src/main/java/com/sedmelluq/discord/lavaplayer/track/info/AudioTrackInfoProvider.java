@@ -32,4 +32,6 @@ public interface AudioTrackInfoProvider {
   String getArtworkUrl();
 
   String getISRC();
+
+  Boolean getIsTrackUnavailable();
 }

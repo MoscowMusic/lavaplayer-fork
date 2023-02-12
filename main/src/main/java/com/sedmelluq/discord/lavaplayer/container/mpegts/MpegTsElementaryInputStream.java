@@ -91,6 +91,9 @@ public class MpegTsElementaryInputStream extends InputStream {
       public String getISRC() {
         return null;
       }
+
+      @Override
+      public Boolean getIsTrackUnavailable() { return false; }
     };
   }
 
