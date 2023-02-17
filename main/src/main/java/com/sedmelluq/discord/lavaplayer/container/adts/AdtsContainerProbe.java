@@ -44,7 +44,7 @@ public class AdtsContainerProbe implements MediaContainerProbe {
 
     log.debug("Track {} is an ADTS stream.", reference.identifier);
 
-    return supportedFormat(this, null, AudioTrackInfoBuilder.create(reference, inputStream).build());
+    return supportedFormat(this, null, AudioTrackInfoBuilder.create(reference, inputStream).setIsTrackUnavailable(false).build());
   }
 
   @Override
