@@ -64,6 +64,7 @@ public class MpegContainerProbe implements MediaContainerProbe {
         .setTitle(file.getTextMetadata("Title"))
         .setAuthor(file.getTextMetadata("Artist"))
         .setLength(fileReader.getDuration())
+        .setIsTrackUnavailable(false)
         .build();
 
     return supportedFormat(this, null, trackInfo);
