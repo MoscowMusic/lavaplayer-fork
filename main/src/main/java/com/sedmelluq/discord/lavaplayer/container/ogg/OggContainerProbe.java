@@ -62,7 +62,6 @@ public class OggContainerProbe implements MediaContainerProbe {
     OggMetadata metadata = OggTrackLoader.loadMetadata(packetInputStream);
 
     if (metadata != null) {
-      if (metadata.getLength() != null) infoBuilder.setIsStream(false);
       infoBuilder.apply(metadata);
     }
   }
