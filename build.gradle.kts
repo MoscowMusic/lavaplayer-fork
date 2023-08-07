@@ -14,7 +14,7 @@ val (gitVersion, release) = versionFromGit()
 logger.lifecycle("Version: $gitVersion (release: $release)")
 
 allprojects {
-    group = "dev.arbjerg"
+    group = "MoscowMusic"
     version = gitVersion
 
     repositories {
@@ -39,8 +39,8 @@ subprojects {
     configure<PublishingExtension> {
         if (findProperty("MAVEN_PASSWORD") != null && findProperty("MAVEN_USERNAME") != null) {
             repositories {
-                val snapshots = "https://maven.arbjerg.dev/snapshots"
-                val releases = "https://maven.arbjerg.dev/releases"
+                val snapshots = "https://maven.moscowmusic.su/snapshots"
+                val releases = "https://maven.moscowmusic.su/releases"
 
                 maven(if (release) releases else snapshots) {
                     credentials {
@@ -50,7 +50,7 @@ subprojects {
                 }
             }
         } else {
-            logger.lifecycle("Not publishing to maven.arbjerg.dev because credentials are not set")
+            logger.lifecycle("Not publishing to maven.moscowmusic.su because credentials are not set")
         }
     }
 
@@ -65,13 +65,13 @@ subprojects {
                         signAllPublications()
                     }
                 } else {
-                    logger.lifecycle("Not publishing to OSSRH due to missing credentials")
+                    logger.lifecycle("Not publishing to maven.moscowmusic.su due to missing credentials")
                 }
 
                 pom {
                     name = "lavaplayer"
-                    description = "A Lavaplayer fork maintained by Lavalink"
-                    url = "https://github.com/lavalink-devs/lavaplayer"
+                    description = "Modified Lavaplayer, which is used in the infrastructure of our application."
+                    url = "https://github.com/MoscowMusic/lavaplayer-fork"
 
                     licenses {
                         license {
@@ -82,16 +82,16 @@ subprojects {
 
                     developers {
                         developer {
-                            id = "freyacodes"
-                            name = "Freya Arbjerg"
-                            url = "https://www.arbjerg.dev"
+                            id = "mxscowc1ty"
+                            name = "Kirill Blagochev"
+                            url = "https://github.com/mxscowc1ty"
                         }
                     }
 
                     scm {
-                        url = "https://github.com/lavalink-devs/lavaplayer/"
-                        connection = "scm:git:git://github.com/lavalink-devs/lavaplayer.git"
-                        developerConnection = "scm:git:ssh://git@github.com/lavalink-devs/lavaplayer.git"
+                        url = "https://github.com/MoscowMusic/lavaplayer-fork/"
+                        connection = "scm:git:git://github.com/MoscowMusic/lavaplayer-fork.git"
+                        developerConnection = "scm:git:ssh://git@github.com/MoscowMusic/lavaplayer-fork.git"
                     }
                 }
             }
@@ -102,15 +102,8 @@ subprojects {
 @SuppressWarnings("GrMethodMayBeStatic")
 fun versionFromGit(): Pair<String, Boolean> {
     Grgit.open(mapOf("currentDir" to project.rootDir)).use { git ->
-        val headTag = git.tag
-            .list()
-            .find { it.commit.id == git.head().id }
+        val headTag = git.tag.list().last()
 
-        val clean = git.status().isClean || System.getenv("CI") != null
-        if (!clean) {
-            logger.lifecycle("Git state is dirty, version is a snapshot.")
-        }
-
-        return if (headTag != null && clean) headTag.name to true else "${git.head().id}-SNAPSHOT" to false
+        return headTag.name to true
     }
 }

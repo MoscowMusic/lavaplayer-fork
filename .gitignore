@@ -34,3 +34,5 @@ version.txt
 *.json
 *.project
 *.html
+
+gradle.properties
