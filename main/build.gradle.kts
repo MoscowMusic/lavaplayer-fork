@@ -1,61 +1,59 @@
+import com.vanniktech.maven.publish.JavaLibrary
+import com.vanniktech.maven.publish.JavadocJar
+import kotlin.io.path.Path
+import kotlin.io.path.createDirectories
+import kotlin.io.path.writeText
+
 plugins {
-  `java-library`
-  groovy
-  `maven-publish`
+    `java-library`
+    alias(libs.plugins.maven.publish.base)
 }
 
-val moduleName = "lavaplayer"
-version = "1.4.2"
+base {
+    archivesName = "lavaplayer"
+}
 
 dependencies {
-  api("com.sedmelluq:lava-common:1.1.2")
-  implementation("com.github.walkyst:lavaplayer-natives-fork:1.0.2")
-  implementation("com.github.walkyst.JAADec-fork:jaadec-ext-aac:0.1.3")
-  implementation("org.mozilla:rhino-engine:1.7.14")
-  implementation("org.slf4j:slf4j-api:1.7.25")
+    api(projects.common)
+    implementation(projects.nativesPublish)
+    implementation(libs.jaadec.fork)
+    implementation(libs.rhino.engine)
+    implementation(libs.slf4j)
 
-  api("org.apache.httpcomponents:httpclient:4.5.10")
-  implementation("commons-io:commons-io:2.6")
+    api(libs.httpclient)
+    implementation(libs.commons.io)
 
-  api("com.fasterxml.jackson.core:jackson-core:2.10.0")
-  api("com.fasterxml.jackson.core:jackson-databind:2.10.0")
+    api(libs.jackson.core)
+    api(libs.jackson.databind)
 
-  implementation("org.jsoup:jsoup:1.12.1")
-  implementation("net.iharder:base64:2.3.9")
-  implementation("org.json:json:20220924")
+    implementation(libs.jsoup)
+    implementation(libs.base64)
+    implementation(libs.json)
 
-  testImplementation("org.codehaus.groovy:groovy:2.5.5")
-  testImplementation("org.spockframework:spock-core:1.2-groovy-2.5")
-  testImplementation("ch.qos.logback:logback-classic:1.2.3")
-  testImplementation("com.sedmelluq:lavaplayer-test-samples:1.3.11")
+    testImplementation(libs.groovy)
+    testImplementation(libs.spock.core)
+    testImplementation(libs.logback.classic)
 }
 
-tasks.jar {
-  exclude("natives")
-}
+tasks {
+    val updateVersion by registering {
+        val output = "$buildDir/resources/main/com/sedmelluq/discord/lavaplayer/tools/version.txt"
+        inputs.property("version", version)
+        outputs.file(output)
 
-val updateVersion by tasks.registering {
-  File("$projectDir/src/main/resources/com/sedmelluq/discord/lavaplayer/tools/version.txt").let {
-    it.parentFile.mkdirs()
-    it.writeText(version.toString())
-  }
-}
-
-tasks.classes.configure {
-  finalizedBy(updateVersion)
-}
-
-val sourcesJar by tasks.registering(Jar::class) {
-  archiveClassifier.set("sources")
-  from(sourceSets["main"].allSource)
-}
-
-publishing {
-  publications {
-    create<MavenPublication>("mavenJava") {
-      from(components["java"])
-      artifactId = moduleName
-      artifact(sourcesJar)
+        doLast {
+            Path(output).let {
+                it.parent.createDirectories()
+                it.writeText(version.toString())
+            }
+        }
     }
-  }
+
+    classes {
+        dependsOn(updateVersion)
+    }
+}
+
+mavenPublishing {
+    configure(JavaLibrary(JavadocJar.Javadoc()))
 }

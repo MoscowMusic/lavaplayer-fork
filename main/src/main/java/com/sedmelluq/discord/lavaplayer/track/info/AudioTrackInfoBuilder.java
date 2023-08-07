@@ -64,7 +64,9 @@ public class AudioTrackInfoBuilder implements AudioTrackInfoProvider {
   }
 
   @Override
-  public Boolean getIsTrackUnavailable() { return isTrackUnavailable; }
+  public Boolean getIsTrackUnavailable() {
+    return isTrackUnavailable;
+  }
 
   public AudioTrackInfoBuilder setTitle(String value) {
     title = DataFormatTools.defaultOnNull(value, title);
@@ -145,16 +147,18 @@ public class AudioTrackInfoBuilder implements AudioTrackInfoProvider {
         uri,
         artworkUrl,
         isrc,
-        isTrackUnavailable
-    );
+        isTrackUnavailable);
   }
 
   /**
-   * Creates an instance of an audio track builder based on an audio reference and a stream.
+   * Creates an instance of an audio track builder based on an audio reference and
+   * a stream.
    *
-   * @param reference Audio reference to use as the starting point for the builder.
-   * @param stream Stream to get additional data from.
-   * @return An instance of the builder with the reference and track info providers from the stream preapplied.
+   * @param reference Audio reference to use as the starting point for the
+   *                  builder.
+   * @param stream    Stream to get additional data from.
+   * @return An instance of the builder with the reference and track info
+   *         providers from the stream preapplied.
    */
   public static AudioTrackInfoBuilder create(AudioReference reference, SeekableInputStream stream) {
     AudioTrackInfoBuilder builder = new AudioTrackInfoBuilder()
