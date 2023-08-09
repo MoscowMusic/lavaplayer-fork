@@ -59,15 +59,6 @@ subprojects {
             configure<MavenPublishBaseExtension> {
                 coordinates(group.toString(), project.the<BasePluginExtension>().archivesName.get(), version.toString())
 
-                if (findProperty("mavenCentralUsername") != null && findProperty("mavenCentralPassword") != null) {
-                    publishToMavenCentral(SonatypeHost.S01, false)
-                    if (release) {
-                        signAllPublications()
-                    }
-                } else {
-                    logger.lifecycle("Not publishing to maven.moscowmusic.su due to missing credentials")
-                }
-
                 pom {
                     name = "lavaplayer"
                     description = "Modified Lavaplayer, which is used in the infrastructure of our application."
@@ -102,8 +93,11 @@ subprojects {
 @SuppressWarnings("GrMethodMayBeStatic")
 fun versionFromGit(): Pair<String, Boolean> {
     Grgit.open(mapOf("currentDir" to project.rootDir)).use { git ->
-        val headTag = git.tag.list().last()
+        val headTag = git.tag.list().find {
+            // Did the parents of the head commit exist in one of the releases
+            it.commit.parentIds.any(git.head().parentIds::contains)
+        }
 
-        return headTag.name to true
+        return if (headTag != null) headTag.name to true else "${git.head().id}-SNAPSHOT" to false
     }
 }
