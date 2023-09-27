@@ -1,8 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
-import com.vanniktech.maven.publish.SonatypeHost
-import org.ajoberstar.grgit.Grgit
 
 plugins {
     id("org.ajoberstar.grgit") version "5.2.0"
@@ -10,12 +8,12 @@ plugins {
     alias(libs.plugins.maven.publish.base) apply false
 }
 
-val (gitVersion, release) = versionFromGit()
-logger.lifecycle("Version: $gitVersion (release: $release)")
+val projectVersion = "2.0.2";
+logger.lifecycle("Version: $projectVersion");
 
 allprojects {
-    group = "MoscowMusic"
-    version = gitVersion
+    group = "MoscowMusic";
+    version = projectVersion;
 
     repositories {
         mavenLocal()
@@ -25,7 +23,7 @@ allprojects {
 }
 
 subprojects {
-    if (project.name == "natives" || project.name == "extensions-project") {
+    if(project.name == "natives" || project.name == "extensions-project") {
         return@subprojects
     }
 
@@ -37,12 +35,11 @@ subprojects {
     }
 
     configure<PublishingExtension> {
-        if (findProperty("MAVEN_PASSWORD") != null && findProperty("MAVEN_USERNAME") != null) {
+        if(findProperty("MAVEN_PASSWORD") != null && findProperty("MAVEN_USERNAME") != null) {
             repositories {
-                val snapshots = "https://maven.moscowmusic.su/snapshots"
                 val releases = "https://maven.moscowmusic.su/releases"
 
-                maven(if (release) releases else snapshots) {
+                maven(releases) {
                     credentials {
                         password = findProperty("MAVEN_PASSWORD") as String?
                         username = findProperty("MAVEN_USERNAME") as String?
@@ -87,17 +84,5 @@ subprojects {
                 }
             }
         }
-    }
-}
-
-@SuppressWarnings("GrMethodMayBeStatic")
-fun versionFromGit(): Pair<String, Boolean> {
-    Grgit.open(mapOf("currentDir" to project.rootDir)).use { git ->
-        val headTag = git.tag.list().find {
-            // Did the parents of the head commit exist in one of the releases
-            it.commit.parentIds.any(git.head().parentIds::contains)
-        }
-
-        return if (headTag != null) headTag.name to true else "${git.head().id}-SNAPSHOT" to false
     }
 }
