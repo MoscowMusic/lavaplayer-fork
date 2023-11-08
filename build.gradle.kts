@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.maven.publish.base) apply false
 }
 
-val projectVersion = "2.0.2";
+val projectVersion = findProperty("MAVEN_VERSION");
 logger.lifecycle("Version: $projectVersion");
 
 allprojects {
