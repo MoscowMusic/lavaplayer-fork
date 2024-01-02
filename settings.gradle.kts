@@ -12,7 +12,6 @@ include(
     ":testbot"
 )
 
-// https://github.com/gradle/gradle/issues/19254
 project(":extensions").name = "extensions-project"
 
 dependencyResolutionManagement {
